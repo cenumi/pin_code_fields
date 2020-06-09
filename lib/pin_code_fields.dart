@@ -151,6 +151,7 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
 
   // Animation for the error animation
   Animation<Offset> _offsetAnimation;
+
   DialogConfig get _dialogConfig => widget.dialogConfig == null
       ? DialogConfig()
       : DialogConfig(
@@ -158,7 +159,11 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
           dialogContent: widget.dialogConfig.dialogContent,
           dialogTitle: widget.dialogConfig.dialogTitle,
           negativeText: widget.dialogConfig.negativeText);
+
   PinTheme get _pinTheme => widget.pinTheme ?? PinTheme();
+
+  // streamSubscription for errorAnimationController
+  StreamSubscription errorAnimationControllerSubscription;
 
   @override
   void initState() {
@@ -197,7 +202,9 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
       }
     });
     if (widget.errorAnimationController != null) {
-      widget.errorAnimationController.stream.listen((errorAnimation) {
+      // manage the subscription of the errorAnimation stream
+      errorAnimationControllerSubscription =
+          widget.errorAnimationController.stream.listen((errorAnimation) {
         if (errorAnimation == ErrorAnimationType.shake) {
           _controller.forward();
         }
@@ -284,6 +291,9 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
             "*** Disposing _textEditingController and _focusNode, To disable this feature please set autoDisposeControllers = false***");
       }
     }
+    // if listen cancel it
+    errorAnimationControllerSubscription?.cancel();
+
     _controller.dispose();
     super.dispose();
   }
